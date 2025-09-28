@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { generateToken } from "../lib/utils.js";
 
 // Middleware to protect routes
@@ -19,10 +20,4 @@ export const protectRoute = async (req, res, next) => {
         console.log(error.message);
         res.json({success: false, message: error.message});
     }
-}
-
-//Controller to check if user is authenticated
-export const checkAuth = async (req, res) => {
-    res.json({success: true, user: req.user});
-
 }

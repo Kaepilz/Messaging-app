@@ -1,14 +1,15 @@
-import express from "express";
-import {checkAuth, login, signup, updateProfile} from "../controllers/userController.js";
-import { protectRoute } from "../middleware/auth.js";
+import express from 'express';
+import { signup, login, checkAuth, updateProfile } from '../controllers/userController.js';
+import { protectRoute } from '../middleware/auth.js';
 
-const useRouter = express.Router();
+const router = express.Router();
 
-useRouter.post("/signup", signup);
-useRouter.post("/login", login);
-useRouter.put("/update-profile", protectRoute, updateProfile);
+// Public routes
+router.post('/signup', signup);
+router.post('/login', login);
 
-// don't know if this is check-auth or check...
-useRouter.get("/check-auth", protectRoute, checkAuth)
+// Protected routes
+router.get('/check', protectRoute, checkAuth);
+router.put('/update-profile', protectRoute, updateProfile);
 
-export default useRouter;
+export default router;

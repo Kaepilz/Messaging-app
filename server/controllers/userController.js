@@ -28,7 +28,7 @@ export const signup = async (req, res) => {
 
     const token = generateToken(newUser._id);
 
-   res.json({success:true, userData: newUser, token, message: "Account created successfully"})
+   res.json({success:true, user: newUser, token, message: "Account created successfully"})
     } catch (error) {
         console.log(error.message);
         res.json({success: false, message: error.message})
@@ -40,7 +40,10 @@ export const login = async(req, res)=>{
     try{
         const{email,password} = req.body;
         const userData = await User.findOne({email})
-
+        if (!userData) {
+            return res.json({ success: false, message: "Incorrect credentials" });
+        }
+        
         const isPasswordCorrect = await bcrypt.compare(password, userData.password);
 
         if (!isPasswordCorrect) { return res.json({success: false, message: "Incorrect credentials"});
@@ -48,7 +51,7 @@ export const login = async(req, res)=>{
 
         const token = generateToken(userData._id);
 
-        res.json({success: true, userData, token, message: "Login successful"})
+        res.json({success: true, user: userData, token, message: "Login successful"})
     } catch (error) {
       console.log(error.message);
       res.json({success: false, message: error.message})
@@ -65,17 +68,16 @@ export const checkAuth = async (req, res) => {
 export const updateProfile = async (req, res) => {
     try{
         const {fullName, bio, profilePic} = req.body;
-        const userId = req.user_id;
+        const userId = req.user._id;
         let updatedUser;
 
         if(!profilePic){
             updatedUser = await User.findByIdAndUpdate(userId, {fullName, bio}, {new: true});
         } else {
             const upload = await cloudinary.uploader.upload(profilePic);
-
-            updatedUser = await User.findByIdAndUpdate(userId, {fullName, bio, profilePic: upload.secure_url}, {new: true});
-        } res.json({success: true, updatedUser})
-
+            updatedUser = await User.findByIdAndUpdate(userId, {fullName, bio, profilePic: upload.secure_url}, {new: true}).select("-password");
+        }
+        return res.json({success: true, user: updatedUser});
         } catch(error){
         console.log(error.message);
         res.json({success: false, message: error.message});
